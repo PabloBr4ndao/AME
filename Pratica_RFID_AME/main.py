@@ -7,14 +7,9 @@ from rfid_rc522 import MFRC522
 from model      import classify, LABELS
 
 # ── Pinos configurados por você ─────────────────────────────
-# SPI0 usando SCK=GP2, MOSI=GP3, MISO=GP4
 spi = SPI(0, baudrate=1_000_000, polarity=0, phase=0,
           sck=Pin(2), mosi=Pin(3), miso=Pin(4))
-
-# CS=GP5, RST=GP0
 rfid = MFRC522(spi=spi, gpioRst=Pin(0), gpioCs=Pin(5))
-
-# Buzzer Ativo = GP18
 buzzer = PWM(Pin(18))
 
 # ── Banco de UIDs cadastrados ─────────────────────────────────
@@ -38,8 +33,7 @@ history = {}
 WINDOW = 8
 
 def update_history(uid_hex, uid_hash):
-    import time as _t
-    now   = _t.localtime()
+    now   = time.localtime()
     hora  = (now[3] * 3600 + now[4] * 60 + now[5])
     dia   = now[6]
 
@@ -109,48 +103,46 @@ beep(1500, 100)
 
 # ── Loop principal ─────────────────────────────────────────────
 while True:
+    # Usando a mesma estrutura de leitura super rápida que funcionou no teste!
     stat, tag_type = rfid.request(rfid.REQIDL)
-    if stat != rfid.OK:
-        time.sleep_ms(100)
-        continue
-
-    stat, raw_uid = rfid.anticoll()
-    if stat != rfid.OK:
-        continue
-
-    uid_hex  = uid_to_hex(raw_uid)
-    uid_hash = sum(raw_uid) % 256
-    t_start  = time.ticks_ms()
-
-    import time as t
-    lt = t.localtime()
-    ts = f"{lt[3]:02d}:{lt[4]:02d}:{lt[5]:02d}"
-
-    # 1. Cartão não cadastrado
-    if uid_hex not in db:
-        print(f"[{ts}] UID={uid_hex}  ACESSO NEGADO (Desconhecido)")
-        beep_alert()
-        time.sleep(2)
-        continue
-
-    # 2. Cartão Cadastrado -> Inferência na IA
-    features = update_history(uid_hex, uid_hash)
-    label, conf = classify(features)
-    cls_idx = LABELS.index(label)
-    t_ms = time.ticks_diff(time.ticks_ms(), t_start)
-    nome = db[uid_hex]["nome"]
-
-    # 3. Tratamento dos Resultados
-    if cls_idx == 0:  # NORMAL
-        print(f"[{ts}] UID={uid_hex} ({nome}) -> LIBERADO  [Conf:{conf}%] [Tempo:{t_ms}ms]")
-        beep(freq=1200, ms=100)
     
-    elif cls_idx == 1: # SUSPEITO / ATÍPICO
-        print(f"[{ts}] UID={uid_hex} ({nome}) -> ATIPICO!  [Conf:{conf}%] [Tempo:{t_ms}ms]")
-        beep(freq=800, ms=300)
-    
-    else: # BLOQUEADO / ANOMALIA GRAVE
-        print(f"[{ts}] UID={uid_hex} ({nome}) -> BLOQUEADO PELO MODELO [Conf:{conf}%] [Tempo:{t_ms}ms]")
-        beep_alert()
+    if stat == rfid.OK:
+        stat, raw_uid = rfid.anticoll()
+        
+        if stat == rfid.OK:
+            uid_hex  = uid_to_hex(raw_uid)
+            uid_hash = sum(raw_uid) % 256
+            t_start  = time.ticks_ms()
 
-    time.sleep(2)
+            lt = time.localtime()
+            ts = f"{lt[3]:02d}:{lt[4]:02d}:{lt[5]:02d}"
+
+            # 1. Cartão não cadastrado
+            if uid_hex not in db:
+                print(f"[{ts}] UID={uid_hex}  ACESSO NEGADO (Desconhecido)")
+                beep_alert()
+                time.sleep(2)
+                continue
+
+            # 2. Cartão Cadastrado -> Inferência na Inteligência Artificial
+            features = update_history(uid_hex, uid_hash)
+            label, conf = classify(features)
+            cls_idx = LABELS.index(label)
+            t_ms = time.ticks_diff(time.ticks_ms(), t_start)
+            nome = db[uid_hex]["nome"]
+
+            # 3. Tratamento dos Resultados
+            if cls_idx == 0:  # NORMAL
+                print(f"[{ts}] UID={uid_hex} ({nome}) -> LIBERADO  [Conf:{conf}%] [Tempo:{t_ms}ms]")
+                beep(freq=1200, ms=100)
+            
+            elif cls_idx == 1: # SUSPEITO / ATÍPICO
+                print(f"[{ts}] UID={uid_hex} ({nome}) -> ATIPICO!  [Conf:{conf}%] [Tempo:{t_ms}ms]")
+                beep(freq=800, ms=300)
+            
+            else: # BLOQUEADO / ANOMALIA GRAVE
+                print(f"[{ts}] UID={uid_hex} ({nome}) -> BLOQUEADO PELO MODELO [Conf:{conf}%] [Tempo:{t_ms}ms]")
+                beep_alert()
+
+            # Pausa de 2 segundos para não ler o mesmo cartão milhares de vezes num único encoste
+            time.sleep(2)

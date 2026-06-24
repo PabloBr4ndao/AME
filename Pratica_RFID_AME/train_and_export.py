@@ -103,7 +103,7 @@ def _softmax(z):
 def lstm_forward(X_seq, W, b):
     """
     X_seq : (batch, seq_len, input_dim)
-    W     : (4*H, input_dim+H)  — portas i,f,o,g concatenadas
+    W     : (4*H, input_dim+H) — portas i,f,o,g concatenadas
     b     : (4*H,)
     """
     B, T, D = X_seq.shape
@@ -212,6 +212,7 @@ print(f"  Memória: {total*4} B (float32) → {total} B (int8)  ({4}× menor)")
 
 def fl(a): return a.flatten().tolist()
 
+# Trocado o comentário interno de predict para aspas simples (''') para evitar conflito de string
 model_py = f"""# model.py — AUTO-GERADO — NAO EDITAR
 # RFID Deep Learning: LSTM({HIDDEN})x2 + Dense({DENSE_H}) + Dense({N_CLASSES}) int8
 # Upload: mpremote cp src/model/model.py :model.py
@@ -248,8 +249,13 @@ def _lstm_seq(seq, W, B, sW, sB):
     return h
 
 def predict(features):
+    '''
+    features: lista de SL timesteps, cada um com IN floats
+              Ex: [[hora/24, dia/7, delta_t, uid_hash/255], ...]
+    Retorna:  [prob_normal, prob_suspeito, prob_bloqueado]
+    '''
     h1 = _lstm_seq(features, W1, B1, SW1, SB1)
-    h2 = _lstm_seq([h1]*SEQ_LEN,  W2, B2, SW2, SB2)
+    h2 = _lstm_seq([h1]*SL,  W2, B2, SW2, SB2)
     d1 = [_relu(sum(WD[k*H+j]*h2[j] for j in range(H))*SWD+BD[k]*SBD) for k in range(DH)]
     z  = [sum(WO[k*DH+j]*d1[j] for j in range(DH))*SWO+BO[k]*SBO for k in range(NC)]
     zm=max(z); ex=[math.exp(v-zm) for v in z]; s=sum(ex)

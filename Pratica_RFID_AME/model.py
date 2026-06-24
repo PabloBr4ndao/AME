@@ -34,8 +34,13 @@ def _lstm_seq(seq, W, B, sW, sB):
     return h
 
 def predict(features):
+    '''
+    features: lista de SL timesteps, cada um com IN floats
+              Ex: [[hora/24, dia/7, delta_t, uid_hash/255], ...]
+    Retorna:  [prob_normal, prob_suspeito, prob_bloqueado]
+    '''
     h1 = _lstm_seq(features, W1, B1, SW1, SB1)
-    h2 = _lstm_seq([h1]*SEQ_LEN,  W2, B2, SW2, SB2)
+    h2 = _lstm_seq([h1]*SL,  W2, B2, SW2, SB2)
     d1 = [_relu(sum(WD[k*H+j]*h2[j] for j in range(H))*SWD+BD[k]*SBD) for k in range(DH)]
     z  = [sum(WO[k*DH+j]*d1[j] for j in range(DH))*SWO+BO[k]*SBO for k in range(NC)]
     zm=max(z); ex=[math.exp(v-zm) for v in z]; s=sum(ex)
