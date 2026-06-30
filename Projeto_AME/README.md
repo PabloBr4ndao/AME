@@ -56,3 +56,4 @@ O sistema processa as leituras fisicamente na borda extrema (Edge AI), garantind
 
 * 📑 **Artigo Científico (Formato SBC):** [Acessar Artigo no Overleaf](https://www.overleaf.com/read/zcdjpmtqhhxw#cd7944)
 * 📊 **Apresentação de Slides:** [Acessar Apresentação no Google Drive](https://drive.google.com/drive/folders/1ZbwKHJKgELofY2mvI3emEaRZVV5U0Mlc?usp=sharing)
+* ▶️ **Notebook:** [Acessar Arquivo 'energy_anomaly_detection.ipynb' no Google Colab](https://colab.research.google.com/drive/1jafGcsB_AHTifLLR1fu9cIKeldUXCd-9?usp=sharing)
