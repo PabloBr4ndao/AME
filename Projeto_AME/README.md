@@ -8,6 +8,7 @@ Este repositório contém o código-fonte final do projeto de detecção local e
 
 ## 📁 Estrutura do Repositório
 
+```
 /
 ├── README.md                           # Documentação e instruções de execução do projeto
 ├── requirements.txt                    # Dependências Python para treinar o modelo computacional
@@ -19,7 +20,7 @@ Este repositório contém o código-fonte final do projeto de detecção local e
 │   └── main.py                         # Código MicroPython para rodar na Raspberry Pi Pico 2 W
 └── data/                         
     └── link_dataset.md                 # Informações, estatísticas e link para o dataset original UK-DALE
-
+```
 
 ## 🛠️ Hardware e Circuito Físico
 
@@ -53,5 +54,5 @@ O sistema processa as leituras fisicamente na borda extrema (Edge AI), garantind
 
 ## 📄 Links e Documentação do Projeto
 
-* 📑 **Artigo Científico (Formato SBC):** [https://www.overleaf.com/read/zcdjpmtqhhxw#cd7944](#)
-* 📊 **Apresentação de Slides:** [https://drive.google.com/drive/folders/1ZbwKHJKgELofY2mvI3emEaRZVV5U0Mlc?usp=sharing](#)
+* 📑 **Artigo Científico (Formato SBC):** [Acessar Artigo no Overleaf](https://www.overleaf.com/read/zcdjpmtqhhxw#cd7944)
+* 📊 **Apresentação de Slides:** [Acessar Apresentação no Google Drive](https://drive.google.com/drive/folders/1ZbwKHJKgELofY2mvI3emEaRZVV5U0Mlc?usp=sharing)
